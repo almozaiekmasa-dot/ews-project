@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الإنذار المبكر للتعثر المالي في المصارف الإسلامية السورية (EWS)</title>
+    <!-- تحميل خط Cairo المصرفي والأكاديمي -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- تحميل Chart.js للرسوم البيانية التفاعلية -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- إعدادات الألوان المخصصة (العنابي والبيج) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        burgundy: {
+                            50: '#FDF2F4',
+                            100: '#FCE7EB',
+                            200: '#F8D0D8',
+                            600: '#8A1C33',
+                            700: '#6B1D2F',
+                            800: '#521423',
+                            900: '#3B0D18',
+                        },
+                        cream: {
+                            50: '#FCFBF9',
+                            100: '#F8F5F0',
+                            200: '#EFECE6',
+                            300: '#E2DDD3',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8F5F0;
+            color: #1F2937;
+            font-family: 'Cairo', sans-serif;
+        }
+        .glass-card {
+            background-color: #FFFFFF;
+            border: 1px solid #E2DDD3;
+            box-shadow: 0 4px 20px -2px rgba(107, 29, 47, 0.06);
+        }
+        .tab-active {
+            background-color: #6B1D2F;
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(107, 29, 47, 0.25);
+        }
+        .tab-inactive {
+            background-color: #EFECE6;
+            color: #521423;
+        }
+        .tab-inactive:hover {
+            background-color: #E2DDD3;
+        }
+        /* تحسين شكل حقول الإدخال الرقمية */
+        input[type="number"] {
+            direction: ltr;
+            text-align: right;
+        }
+        /* شريط التمرير المخصص */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #EFECE6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8A1C33;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- الشريط العلوي (Header) -->
+    <header class="bg-gradient-to-l from-burgundy-900 via-burgundy-700 to-burgundy-800 text-white shadow-lg border-b-4 border-amber-500/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <!-- شعار أيقوني للنظام -->
+                    <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center shrink-0">
+                        <svg class="w-8 h-8 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">نظام الإنذار المبكر للتعثر المالي في المصارف الإسلامية السورية (EWS)</h1>
+                            <span class="px-2.5 py-0.5 text-xs font-bold bg-amber-400/20 text-amber-200 border border-amber-400/40 rounded-full">الإصدار المعاير 1/NSR</span>
+                        </div>
+                        <p class="text-burgundy-100 text-sm mt-1">الإطار الهجين ثلاثي الطبقات: القواعد الموزونة + التجاوز الرقابي + الإنذار القطاعي للصدمات المشتركة</p>
+                    </div>
+                </div>
+                <!-- شارة حالة المعايرة -->
+                <div class="bg-burgundy-950/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs flex items-center gap-3 self-end md:self-auto">
+                    <div class="text-left">
+                        <span class="block text-burgundy-200">نسبة الضجيج إلى الإشارة</span>
+                        <span class="font-extrabold text-emerald-400 text-sm">NSR = 0.37 <span class="text-burgundy-300 font-normal">(بدلاً من 1.67)</span></span>
+                    </div>
+                    <div class="h-8 w-px bg-white/15"></div>
+                    <div>
+                        <span class="block text-burgundy-200">نطاق العينة</span>
+                        <span class="font-bold text-white">4 مصارف | 39 مشاهدة</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- شريط التنقل بين التبويبات الرئيسية -->
+    <div class="bg-cream-200/80 border-b border-cream-300 sticky top-0 z-30 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <nav class="flex flex-wrap gap-2" role="tablist">
+                <button onclick="switchTab('simulator')" id="tab-btn-simulator" class="tab-active px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    لوحة المحاكاة والحساب الفوري
+                </button>
+                <button onclick="switchTab('explorer')" id="tab-btn-explorer" class="tab-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    قاعدة بيانات المصارف الأربعة (2012–2025)
+                </button>
+                <button onclick="switchTab('methodology')" id="tab-btn-methodology" class="tab-inactive px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    مقارنة الكفاءة والانحدار اللوجستي
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ===================================================================== -->
+        <!-- التبويب الأول: لوحة المحاكاة والحساب الفوري (Interactive Simulator) -->
+        <!-- ===================================================================== -->
+        <section id="view-simulator" class="space-y-6">
+            
+            <!-- شريط الحالات السريعة (Quick Load Presets للمناقشة) -->
+            <div class="glass-card rounded-2xl p-4 bg-gradient-to-r from-cream-100 to-white">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-burgundy-600 animate-pulse"></span>
+                        <span class="text-sm font-bold text-burgundy-800">اختبار سريع لحالات مرجعية من الدراسة (لعرضها أمام اللجنة):</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="loadPreset('siib_2013')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-100 text-red-800 border border-red-200 hover:bg-red-200 transition">
+                            سورية الدولي 2013 (حرج S=1.00)
+                        </button>
+                        <button onclick="loadPreset('siib_2019')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-orange-100 text-orange-800 border border-orange-200 hover:bg-orange-200 transition">
+                            سورية الدولي 2019 (تجاوز بازل 3*)
+                        </button>
+                        <button onclick="loadPreset('nib_2024')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-purple-100 text-purple-800 border border-purple-200 hover:bg-purple-200 transition">
+                            الوطني الإسلامي 2024 (سنة تأسيس)
+                        </button>
+                        <button onclick="loadPreset('cham_2016_shock')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition">
+                            بنك الشام 2016 + صدمة قطع
+                        </button>
+                        <button onclick="loadPreset('baraka_2023')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-200 hover:bg-emerald-200 transition">
+                            بنك البركة 2023 (مستقر)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- العمود الأيمن (7 أعمدة): مدخلات البيانات والضوابط التشغيلية -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- بطاقة الإدخال -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-cream-200">
+                            <div>
+                                <h2 class="text-lg font-extrabold text-burgundy-800">1. بيانات المؤشرات المالية للمصرف</h2>
+                                <p class="text-xs text-gray-500 mt-0.5">أدخل النسب المئوية (%) أو انتقل لإدخال البنود المحاسبية الخام. اترك أي حقل فارغاً لاختبار إعادة توزيع الأوزان.</p>
+                            </div>
+                            <!-- مبدل وضع الإدخال -->
+                            <div class="inline-flex rounded-xl bg-cream-200 p-1 shrink-0">
+                                <button onclick="setInputMode('ratios')" id="mode-ratios" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-burgundy-700 text-white shadow transition">
+                                    نسب مئوية جاهزة
+                                </button>
+                                <button onclick="setInputMode('raw')" id="mode-raw" class="px-3 py-1.5 rounded-lg text-xs font-bold text-burgundy-800 hover:bg-cream-300 transition">
+                                    بنود محاسبية خام
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- اسم المصرف والسنة (اختياري للتوثيق) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 bg-cream-100/70 p-3.5 rounded-xl border border-cream-200">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">اسم المصرف الإسلامي</label>
+                                <input type="text" id="inp-bank-name" value="بنك سورية الدولي الإسلامي (محاكاة)" class="w-full px-3 py-2 text-sm bg-white border border-cream-300 rounded-lg focus:outline-none focus:border-burgundy-600" style="direction: rtl; text-align: right;">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">سنة التقييم (t) — للتنبؤ بسنة (t+1)</label>
+                                <input type="number" id="inp-year" value="2013" class="w-full px-3 py-2 text-sm bg-white border border-cream-300 rounded-lg focus:outline-none focus:border-burgundy-600">
+                            </div>
+                        </div>
+
+                        <!-- وضع 1: إدخال النسب المئوية مباشرة -->
+                        <div id="panel-ratios" class="mt-5 space-y-4">
+                            <!-- صف 1: CAR الحالي والسابق -->
+                            <div class="p-3.5 rounded-xl border border-cream-200 bg-cream-50/50">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-extrabold text-burgundy-800">1. كفاية رأس المال الرقابية (CAR) — الوزن الأساسي: 27.0%</span>
+                                    <span class="text-[11px] text-gray-500">الإشارة: انخفاض ≥ 5.32 نقطة مئوية</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">CAR السنة الحالية t (%)</label>
+                                        <input type="number" step="0.01" id="r-car-curr" value="29.02" oninput="calculateEWS()" placeholder="مثال: 29.02" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">CAR السنة السابقة t-1 (%)</label>
+                                        <input type="number" step="0.01" id="r-car-prev" value="53.23" oninput="calculateEWS()" placeholder="مثال: 53.23" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- صف 2: CIR -->
+                            <div class="p-3.5 rounded-xl border border-cream-200 bg-cream-50/50">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-extrabold text-burgundy-800">2. الكفاءة التشغيلية (CIR) — الوزن الأساسي: 27.0%</span>
+                                    <span class="text-[11px] text-gray-500">الإشارة: CIR ≥ 67.76%</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">نسبة المصروفات التشغيلية إلى الإيرادات التشغيلية (%)</label>
+                                    <input type="number" step="0.01" id="r-cir" value="156.41" oninput="calculateEWS()" placeholder="مثال: 156.41" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                </div>
+                            </div>
+
+                            <!-- صف 3: ROA الحالي والسابق -->
+                            <div class="p-3.5 rounded-xl border border-cream-200 bg-cream-50/50">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-extrabold text-burgundy-800">3. العائد على الموجودات الأساسي (ROA) — الوزن الأساسي: 17.3%</span>
+                                    <span class="text-[11px] text-gray-500">الإشارة: ≤ 0.88% أو انخفاض ≥ 3.01 نقطة أو &lt; 0%</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">ROA السنة الحالية t (%)</label>
+                                        <input type="number" step="0.01" id="r-roa-curr" value="0.22" oninput="calculateEWS()" placeholder="مثال: 0.22" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">ROA السنة السابقة t-1 (%)</label>
+                                        <input type="number" step="0.01" id="r-roa-prev" value="0.79" oninput="calculateEWS()" placeholder="اختياري لحساب التغير" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- صف 4: NPL الحالي والسابق -->
+                            <div class="p-3.5 rounded-xl border border-cream-200 bg-cream-50/50">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-extrabold text-burgundy-800">4. جودة التمويل (NPL) — الوزن الأساسي: 15.2%</span>
+                                    <span class="text-[11px] text-gray-500">الإشارة: ≥ 28.21% أو ارتفاع ≥ 6.06 نقطة</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">NPL السنة الحالية t (%)</label>
+                                        <input type="number" step="0.01" id="r-npl-curr" value="56.31" oninput="calculateEWS()" placeholder="مثال: 56.31" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">NPL السنة السابقة t-1 (%)</label>
+                                        <input type="number" step="0.01" id="r-npl-prev" value="24.05" oninput="calculateEWS()" placeholder="اختياري لحساب التغير" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- صف 5: COV -->
+                            <div class="p-3.5 rounded-xl border border-cream-200 bg-cream-50/50">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-extrabold text-burgundy-800">5. نسبة تغطية المخصصات (COV = LLR/NPL) — الوزن الأساسي: 13.5%</span>
+                                    <span class="text-[11px] text-gray-500">الإشارة: COV ≤ 51.04%</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">تغطية المخصصات للتمويلات المتعثرة (%)</label>
+                                    <input type="number" step="0.01" id="r-cov" value="34.72" oninput="calculateEWS()" placeholder="مثال: 34.72" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- وضع 2: إدخال البنود المحاسبية الخام (Raw Accounting Items) -->
+                        <div id="panel-raw" class="hidden mt-5 space-y-4">
+                            <div class="bg-burgundy-50 border border-burgundy-200 rounded-xl p-3 text-xs text-burgundy-800">
+                                <strong>الاحتساب الآلي الموحد:</strong> أدخل المبالغ من القوائم المالية المدققة (بملايين الليرات السورية) وسيقوم النظام باستخراج النسب الخمس بدقة محاسبية وتحديث التحليل فوراً.
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">رأس المال الرقابي (t)</label>
+                                    <input type="number" id="raw-reg-cap" value="14500" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">الموجودات المرجحة بالمخاطر (t)</label>
+                                    <input type="number" id="raw-rwa" value="50000" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">CAR السنة السابقة t-1 (%)</label>
+                                    <input type="number" step="0.01" id="raw-car-prev" value="53.23" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">صافي الربح الأساسي (بعد استبعاد تقييم القطع)</label>
+                                    <input type="number" id="raw-net-inc" value="220" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">إجمالي الموجودات (بداية الفترة)</label>
+                                    <input type="number" id="raw-assets-beg" value="95000" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">إجمالي الموجودات (نهاية الفترة)</label>
+                                    <input type="number" id="raw-assets-end" value="105000" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">إجمالي المحفظة التمويلية (صافي الأرباح المؤجلة)</label>
+                                    <input type="number" id="raw-tot-fin" value="30000" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">التمويلات المتعثرة (المرحلة الثالثة)</label>
+                                    <input type="number" id="raw-npl-amt" value="16893" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">رصيد مخصص خسائر الائتمان المتراكم</label>
+                                    <input type="number" id="raw-llr-amt" value="5865" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">المصروفات التشغيلية والمخصصات (بيان الدخل)</label>
+                                    <input type="number" id="raw-op-exp" value="4692" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">إجمالي الدخل التشغيلي الخاص بالمصرف</label>
+                                    <input type="number" id="raw-op-inc" value="3000" oninput="computeFromRaw()" class="w-full px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بطاقة الضوابط التشغيلية الخاصة وطبقة الإنذار القطاعي -->
+                    <div class="glass-card rounded-2xl p-6 space-y-4">
+                        <h3 class="text-base font-extrabold text-burgundy-800 border-b border-cream-200 pb-2.5">2. الضوابط التشغيلية وطبقة الإنذار القطاعي (الصدمات الخارجية)</h3>
+                        
+                        <!-- خيار سنة التأسيس -->
+                        <label class="flex items-start gap-3 p-3.5 rounded-xl bg-cream-100 border border-cream-300 cursor-pointer hover:bg-cream-200/70 transition">
+                            <input type="checkbox" id="chk-founding" onchange="calculateEWS()" class="mt-1 w-4 h-4 accent-burgundy-700 rounded">
+                            <div>
+                                <span class="block text-sm font-bold text-gray-800">تحييد أثر سنة التأسيس (Founding Year Adjustment)</span>
+                                <span class="block text-xs text-gray-600 mt-0.5">يُفعّل في السنة الثانية لنشاط المصرف لمنع إطلاق إشارة إنذار كاذبة نتيجة هبوط CAR من مستويات التأسيس الاستثنائية (مثل حالة البنك الوطني الإسلامي 2023–2024).</span>
+                            </div>
+                        </label>
+
+                        <!-- طبقة الإنذار القطاعي -->
+                        <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-3">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" id="chk-sectoral" onchange="toggleSectoralInputs(); calculateEWS();" class="mt-1 w-4 h-4 accent-burgundy-700 rounded">
+                                <div>
+                                    <span class="block text-sm font-extrabold text-amber-950">تفعيل طبقة الإنذار القطاعي (صدمة سعر صرف / أزمة نظامية مشتركة)</span>
+                                    <span class="block text-xs text-amber-800 mt-0.5">تُفعّل عند تقلب سعر الصرف فوق الربع الأعلى التاريخي أو صدور إشارة ربحية/كفاءة لدى نصف مصارف القطاع فأكثر (كما حدث في صدمتي 2017 و2025).</span>
+                                </div>
+                            </label>
+                            
+                            <div id="sectoral-details" class="hidden pt-2 border-t border-amber-200/80 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-amber-900 mb-1">انكشاف مركز القطع البنيوي (FXR = صافي المركز ÷ حقوق الملكية %)</label>
+                                    <input type="number" step="0.1" id="inp-fxr" value="25" oninput="calculateEWS()" class="w-full px-3 py-1.5 text-sm bg-white border border-amber-300 rounded-lg">
+                                </div>
+                                <div class="flex items-center text-xs text-amber-900 bg-white/70 p-2.5 rounded-lg border border-amber-200">
+                                    <span>القاعدة: إذا كان الانكشاف <strong class="text-burgundy-700">FXR ≥ 15%</strong> مع وجود صدمة قطاعية، يُرفع مستوى الإنذار <strong>درجة واحدة تلقائياً</strong>.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بطاقة المؤشرات المساندة للمراقبة الدورية (غير موزونة) -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between border-b border-cream-200 pb-2.5 mb-4">
+                            <h3 class="text-base font-extrabold text-burgundy-800">3. قائمة المراقبة الدورية المساندة (مؤشرات استرشادية غير موزونة)</h3>
+                            <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-cream-200 text-gray-700 font-semibold">لا تدخل في S</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">ROE (%) <span class="text-[10px] text-gray-400">(الحد ≤ 6.96%)</span></label>
+                                <input type="number" step="0.01" id="aux-roe" value="2.03" oninput="updateAuxBadges()" class="w-full px-2.5 py-1.5 text-sm bg-cream-50 border border-gray-300 rounded-lg">
+                                <span id="badge-roe" class="inline-block mt-1 text-[10px] font-bold"></span>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">السيولة LIQ (%) <span class="text-[10px] text-gray-400">(≤ 62.9%)</span></label>
+                                <input type="number" step="0.01" id="aux-liq" value="64.29" oninput="updateAuxBadges()" class="w-full px-2.5 py-1.5 text-sm bg-cream-50 border border-gray-300 rounded-lg">
+                                <span id="badge-liq" class="inline-block mt-1 text-[10px] font-bold"></span>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">التمويل/الودائع FDR <span class="text-[10px] text-gray-400">(≥ 48.6%)</span></label>
+                                <input type="number" step="0.01" id="aux-fdr" value="37.44" oninput="updateAuxBadges()" class="w-full px-2.5 py-1.5 text-sm bg-cream-50 border border-gray-300 rounded-lg">
+                                <span id="badge-fdr" class="inline-block mt-1 text-[10px] font-bold"></span>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">هيكل التمويل FUND <span class="text-[10px] text-gray-400">(≤ 58.9%)</span></label>
+                                <input type="number" step="0.01" id="aux-fund" value="62.30" oninput="updateAuxBadges()" class="w-full px-2.5 py-1.5 text-sm bg-cream-50 border border-gray-300 rounded-lg">
+                                <span id="badge-fund" class="inline-block mt-1 text-[10px] font-bold"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- العمود الأيسر (5 أعمدة): لوحة النتائج والتشخيص ومصفوفة الحوكمة -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- بطاقة النتيجة الرئيسية ومستوى الإنذار -->
+                    <div id="result-card" class="glass-card rounded-2xl p-6 border-t-8 border-red-600 transition-all">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-bold uppercase tracking-wider text-gray-500">مخرج نظام الإنذار المبكر (EWS Output)</span>
+                                <h2 id="res-bank-title" class="text-base font-extrabold text-burgundy-900 mt-0.5">بنك سورية الدولي الإسلامي (2013)</h2>
+                            </div>
+                            <span id="res-badge" class="px-4 py-1.5 rounded-full text-sm font-extrabold bg-red-100 text-red-800 border border-red-300 shadow-sm">
+                                إنذار حرج
+                            </span>
+                        </div>
+
+                        <!-- مقياس الدرجة المركبة S -->
+                        <div class="my-6 flex flex-col items-center justify-center bg-cream-100 rounded-2xl p-5 border border-cream-200">
+                            <span class="text-xs font-bold text-gray-500 mb-1">الدرجة المركبة الموزونة S(i,t)</span>
+                            <div class="flex items-baseline gap-1">
+                                <span id="res-score" class="text-5xl font-black text-burgundy-800">1.00</span>
+                                <span class="text-sm font-bold text-gray-400">/ 1.00</span>
+                            </div>
+                            
+                            <!-- شريط التدرج البصري للعتبات (0.15, 0.30, 0.50) -->
+                            <div class="w-full mt-4">
+                                <div class="relative h-3 w-full rounded-full overflow-hidden flex bg-gray-200">
+                                    <div class="bg-emerald-500 h-full" style="width: 15%" title="منخفض < 0.15"></div>
+                                    <div class="bg-amber-400 h-full" style="width: 15%" title="متوسط 0.15 - 0.30"></div>
+                                    <div class="bg-orange-500 h-full" style="width: 20%" title="مرتفع 0.30 - 0.50"></div>
+                                    <div class="bg-red-600 h-full" style="width: 50%" title="حرج >= 0.50"></div>
+                                </div>
+                                <!-- مؤشر الموقع الحالي -->
+                                <div class="relative w-full h-4">
+                                    <div id="score-pointer" class="absolute -top-1 transform translate-x-1/2 transition-all duration-300" style="right: 100%;">
+                                        <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-burgundy-900 mx-auto"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between text-[10px] font-bold text-gray-500 mt-0.5">
+                                    <span>0.00</span>
+                                    <span>0.15</span>
+                                    <span>0.30</span>
+                                    <span>0.50</span>
+                                    <span>1.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- تنبيهات التجاوز الرقابي أو الإنذار القطاعي أو إعادة توزيع الأوزان -->
+                        <div id="res-notices" class="space-y-2 mb-4"></div>
+
+                        <!-- مصفوفة الإجراءات التصحيحية والحوكمة (الجدول 15) -->
+                        <div class="rounded-xl bg-burgundy-50/80 border border-burgundy-200 p-4 space-y-2.5">
+                            <div class="flex items-center gap-2 text-burgundy-900 font-extrabold text-sm">
+                                <svg class="w-4 h-4 text-burgundy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                <span>مصفوفة الاستجابة والحوكمة الرقابية (الجدول 15)</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-white p-2.5 rounded-lg border border-burgundy-100">
+                                    <span class="block text-gray-400 text-[11px]">الجهة المسؤولة</span>
+                                    <span id="gov-owner" class="font-extrabold text-burgundy-800">مجلس الإدارة</span>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-burgundy-100">
+                                    <span class="block text-gray-400 text-[11px]">دورية المتابعة</span>
+                                    <span id="gov-freq" class="font-extrabold text-burgundy-800">فوري</span>
+                                </div>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg border border-burgundy-100 text-xs">
+                                <span class="block text-gray-400 text-[11px] mb-0.5">الإجراء التصحيحي المطلوب</span>
+                                <p id="gov-action" class="font-bold text-gray-800 leading-relaxed">تصعيد فوري وتفعيل خطة المعالجة وإبلاغ مصرف سورية المركزي.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بطاقة تفكيك مصادر الخطر (Root-Cause Breakdown) -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-base font-extrabold text-burgundy-800 mb-1">تفكيك الإشارات ومساهمة المؤشرات في الدرجة (S)</h3>
+                        <p class="text-xs text-gray-500 mb-4">يوضح الجدول أدناه حالة كل مؤشر مقارنة بعتبة الإشارة المعايرة والوزن الفعلي المطبق:</p>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-right border-collapse">
+                                <thead>
+                                    <tr class="bg-cream-200 text-burgundy-900 font-bold">
+                                        <th class="p-2.5 rounded-tr-lg">المؤشر</th>
+                                        <th class="p-2.5">القيمة المحسوبة</th>
+                                        <th class="p-2.5">الوزن الفعلي</th>
+                                        <th class="p-2.5">الحالة</th>
+                                        <th class="p-2.5 rounded-tl-lg">المساهمة</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="breakdown-tbody" class="divide-y divide-cream-200">
+                                    <!-- يتم تعبئتها ديناميكياً -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- التبويب الثاني: قاعدة بيانات المصارف الأربعة (Historical Explorer) -->
+        <!-- ===================================================================== -->
+        <section id="view-explorer" class="hidden space-y-6">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-cream-200">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-burgundy-800">قاعدة البيانات التاريخية المدققة والاختبار الرجعي (2012–2025)</h2>
+                        <p class="text-xs text-gray-600 mt-1">اختر المصرف لاستعراض سلسلته الزمنية الكاملة، واضغط على أي سنة لتحميل أرقامها الفورية في لوحة المحاكاة.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2" id="bank-selector-btns">
+                        <button onclick="selectBankHistory('cham')" id="btn-bank-cham" class="px-4 py-2 rounded-xl text-xs font-bold bg-burgundy-700 text-white shadow">بنك الشام (12)</button>
+                        <button onclick="selectBankHistory('siib')" id="btn-bank-siib" class="px-4 py-2 rounded-xl text-xs font-bold bg-cream-200 text-burgundy-900 hover:bg-cream-300">سورية الدولي الإسلامي (12)</button>
+                        <button onclick="selectBankHistory('baraka')" id="btn-bank-baraka" class="px-4 py-2 rounded-xl text-xs font-bold bg-cream-200 text-burgundy-900 hover:bg-cream-300">بنك البركة – سورية (12)</button>
+                        <button onclick="selectBankHistory('nib')" id="btn-bank-nib" class="px-4 py-2 rounded-xl text-xs font-bold bg-cream-200 text-burgundy-900 hover:bg-cream-300">الوطني الإسلامي (3)</button>
+                    </div>
+                </div>
+
+                <!-- الرسم البياني لمسار الدرجة المركبة S عبر الزمن -->
+                <div class="mt-6 bg-cream-50 p-4 rounded-2xl border border-cream-200">
+                    <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                        <h3 id="chart-bank-title" class="text-sm font-extrabold text-burgundy-900">مسار الدرجة المركبة للإنذار المبكر S(t) — بنك الشام</h3>
+                        <div class="flex items-center gap-3 text-[11px] font-bold">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-burgundy-700 inline-block"></span> الدرجة المركبة S</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-orange-500 inline-block"></span> عتبة الإنذار المرتفع (0.30)</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-red-600 inline-block"></span> عتبة الإنذار الحرج (0.50)</span>
+                        </div>
+                    </div>
+                    <div class="h-64 w-full">
+                        <canvas id="historyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- جدول المشاهدات التفصيلي للمصرف المختار -->
+                <div class="mt-6 overflow-x-auto">
+                    <table class="w-full text-xs text-right border-collapse">
+                        <thead>
+                            <tr class="bg-burgundy-800 text-white font-bold">
+                                <th class="p-3 rounded-tr-xl">السنة (t)</th>
+                                <th class="p-3">CAR (%)</th>
+                                <th class="p-3">NPL (%)</th>
+                                <th class="p-3">COV (%)</th>
+                                <th class="p-3">ROA (%)</th>
+                                <th class="p-3">CIR (%)</th>
+                                <th class="p-3">الدرجة S</th>
+                                <th class="p-3">مستوى الإنذار</th>
+                                <th class="p-3">التعثر اللاحق Y(t+1)</th>
+                                <th class="p-3 rounded-tl-xl text-center">إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody" class="divide-y divide-cream-200 bg-white">
+                            <!-- يتم تعبئتها ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- التبويب الثالث: مقارنة الكفاءة والانحدار اللوجستي (Methodology) -->
+        <!-- ===================================================================== -->
+        <section id="view-methodology" class="hidden space-y-6">
+            
+            <!-- مقارنة النسخة الأولية مقابل القاعدة المعدلة (الجدول 16) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 glass-card rounded-2xl p-6">
+                    <h2 class="text-lg font-extrabold text-burgundy-800 mb-1">تطور كفاءة النظام: النسخة الأولية مقابل القاعدة الموزونة المعدّلة (الجدول 16)</h2>
+                    <p class="text-xs text-gray-500 mb-5">نتائج الاختبار الرجعي داخل العينة على 32 مشاهدة صالحة للتقدير تتضمن 5 حالات تعثر لاحق (t+1).</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                            <span class="block text-xs font-bold text-emerald-800">معدل الإصابة (Detection)</span>
+                            <div class="mt-2 flex items-center justify-center gap-2">
+                                <span class="text-sm line-through text-gray-400 font-bold">20%</span>
+                                <span class="text-2xl font-black text-emerald-700">40%</span>
+                            </div>
+                            <span class="block text-[11px] text-emerald-600 mt-1">مضاعفة القدرة على الرصد</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-blue-50 border border-blue-200 text-center">
+                            <span class="block text-xs font-bold text-blue-800">الإنذارات الكاذبة (False Alarms)</span>
+                            <div class="mt-2 flex items-center justify-center gap-2">
+                                <span class="text-sm line-through text-gray-400 font-bold">33%</span>
+                                <span class="text-2xl font-black text-blue-700">15%</span>
+                            </div>
+                            <span class="block text-[11px] text-blue-600 mt-1">انخفاض بأكثر من النصف</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-burgundy-50 border border-burgundy-200 text-center">
+                            <span class="block text-xs font-bold text-burgundy-800">نسبة الضجيج إلى الإشارة (NSR)</span>
+                            <div class="mt-2 flex items-center justify-center gap-2">
+                                <span class="text-sm line-through text-gray-400 font-bold">1.67</span>
+                                <span class="text-2xl font-black text-burgundy-700">0.37</span>
+                            </div>
+                            <span class="block text-[11px] text-burgundy-600 mt-1">أقل من 1.00 بكفاءة عالية</span>
+                        </div>
+                    </div>
+
+                    <div class="h-64">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- بطاقة أوزان 1/NSR ومعادلة الانحدار اللوجستي المستقبلي -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-base font-extrabold text-burgundy-800 mb-3">أوزان المؤشرات المعتمدة وفق معيار (1/NSR)</h3>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <div class="flex justify-between font-bold mb-1">
+                                    <span>التغير في كفاية رأس المال (ΔCAR) — NSR: 0.28</span>
+                                    <span class="text-burgundy-700">27.0%</span>
+                                </div>
+                                <div class="w-full bg-cream-200 h-2 rounded-full"><div class="bg-burgundy-700 h-2 rounded-full" style="width: 27%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-bold mb-1">
+                                    <span>الكفاءة التشغيلية (CIR) — NSR: 0.28</span>
+                                    <span class="text-burgundy-700">27.0%</span>
+                                </div>
+                                <div class="w-full bg-cream-200 h-2 rounded-full"><div class="bg-burgundy-700 h-2 rounded-full" style="width: 27%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-bold mb-1">
+                                    <span>العائد على الموجودات (ROA) — NSR: 0.43</span>
+                                    <span class="text-burgundy-700">17.3%</span>
+                                </div>
+                                <div class="w-full bg-cream-200 h-2 rounded-full"><div class="bg-burgundy-600 h-2 rounded-full" style="width: 17.3%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-bold mb-1">
+                                    <span>التمويلات المتعثرة (NPL) — NSR: 0.49</span>
+                                    <span class="text-burgundy-700">15.2%</span>
+                                </div>
+                                <div class="w-full bg-cream-200 h-2 rounded-full"><div class="bg-burgundy-600 h-2 rounded-full" style="width: 15.2%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between font-bold mb-1">
+                                    <span>تغطية المخصصات (COV) — NSR: 0.56</span>
+                                    <span class="text-burgundy-700">13.5%</span>
+                                </div>
+                                <div class="w-full bg-cream-200 h-2 rounded-full"><div class="bg-burgundy-500 h-2 rounded-full" style="width: 13.5%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- جاهزية الشق الإحصائي (الانحدار اللوجستي) -->
+                    <div class="glass-card rounded-2xl p-6 bg-gradient-to-br from-white to-cream-100">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-base font-extrabold text-burgundy-800">جاهزية نموذج الانحدار اللوجستي المكمل</h3>
+                            <span class="px-2.5 py-0.5 text-[11px] font-bold bg-amber-100 text-amber-800 rounded-full">مؤجل منهجياً</span>
+                        </div>
+                        <p class="text-xs text-gray-600 leading-relaxed mb-3">
+                            وفق قاعدة <strong>(Peduzzi et al., 1996)</strong>، يتطلب التقدير المستقر لمعاملات المتغيرات الخمسة توافر <strong>10 حالات تعثر لكل متغير مستقل</strong> (إجمالي 50 حالة تعثر).
+                        </p>
+                        
+                        <div class="mb-3">
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span>حالات التعثر المتوافرة حالياً في العينة:</span>
+                                <span class="text-burgundy-700">5 / 50 حالة (10%)</span>
+                            </div>
+                            <div class="w-full bg-cream-300 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-2.5 rounded-full" style="width: 10%"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-burgundy-900 text-amber-200 font-mono text-[11px] text-left" dir="ltr">
+                            ln[ P(Y=1) / (1 - P(Y=1)) ] = β₀ + β₁·NPL(t) + β₂·CIR(t) + β₃·ΔCAR(t) + β₄·COV(t) + β₅·ROA(t)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- التذييل (Footer) -->
+    <footer class="bg-cream-200 border-t border-cream-300 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-600">
+            <span>إطار نظام الإنذار المبكر للتعثر المالي في المصارف الإسلامية السورية — النسخة التطبيقية المعايرة</span>
+            <span>منهجية الإشارات الموزونة <strong class="text-burgundy-800">(1/NSR)</strong> وفق (Kaminsky et al., 1998)</span>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- المنطق البرمجي وقاعدة البيانات الكاملة للمصارف الأربعة (JavaScript) -->
+    <!-- ===================================================================== -->
+    <script>
+        // 1. قاعدة البيانات الكاملة من الفصل الثالث (39 مشاهدة للمصارف الإسلامية السورية الأربعة)
+        const HISTORICAL_DATA = {
+            cham: {
+                name: "بنك الشام",
+                period: "2012 – 2023",
+                rows: [
+                    { year: 2012, car: 56.29, carPrev: null, npl: 22.29, nplPrev: null, llr: 9.55, roa: 1.77, roaPrev: null, roe: 6.91, liq: 69.79, fdr: 40.09, cir: 25.96, fund: 68.92, y: "0", founding: false },
+                    { year: 2013, car: 51.26, carPrev: 56.29, npl: 37.40, nplPrev: 22.29, llr: 16.65, roa: 5.68, roaPrev: 1.77, roe: 36.99, liq: 87.56, fdr: 15.68, cir: 11.19, fund: 77.17, y: "0", founding: false },
+                    { year: 2014, car: 54.69, carPrev: 51.26, npl: 35.58, nplPrev: 37.40, llr: 16.59, roa: 3.35, roaPrev: 5.68, roe: 24.17, liq: 87.44, fdr: 15.92, cir: 17.38, fund: 73.63, y: "0", founding: false },
+                    { year: 2015, car: 47.05, carPrev: 54.69, npl: 7.58, nplPrev: 35.58, llr: 4.24, roa: 6.48, roaPrev: 3.35, roe: 43.59, liq: 80.97, fdr: 64.01, cir: 12.18, fund: 58.39, y: "0", founding: false },
+                    { year: 2016, car: 41.73, carPrev: 47.05, npl: 6.40, nplPrev: 7.58, llr: 7.17, roa: 5.92, roaPrev: 6.48, roe: 43.08, liq: 81.16, fdr: 20.20, cir: 14.72, fund: 83.36, y: "1", founding: false },
+                    { year: 2017, car: 22.67, carPrev: 41.73, npl: 4.27, nplPrev: 6.40, llr: 7.57, roa: -1.58, roaPrev: 5.92, roe: -10.72, liq: 67.86, fdr: 36.99, cir: 165.97, fund: 76.51, y: "NA", founding: false },
+                    { year: 2018, car: 26.22, carPrev: 22.67, npl: 2.85, nplPrev: 4.27, llr: 5.35, roa: 0.59, roaPrev: -1.58, roe: 3.85, liq: 81.02, fdr: 42.01, cir: 77.45, fund: 77.15, y: "0", founding: false },
+                    { year: 2019, car: 25.75, carPrev: 26.22, npl: 5.06, nplPrev: 2.85, llr: 3.72, roa: 1.86, roaPrev: 0.59, roe: 11.89, liq: 55.67, fdr: 49.36, cir: 42.49, fund: 75.17, y: "0", founding: false },
+                    { year: 2020, car: 37.46, carPrev: 25.75, npl: 36.41, nplPrev: 5.06, llr: 3.44, roa: 11.21, roaPrev: 1.86, roe: 70.28, liq: 67.97, fdr: 43.12, cir: 16.67, fund: 61.11, y: "0", founding: false },
+                    { year: 2021, car: 38.03, carPrev: 37.46, npl: 3.64, nplPrev: 36.41, llr: 1.83, roa: 8.33, roaPrev: 11.21, roe: 55.66, liq: 73.59, fdr: 26.64, cir: 17.38, fund: 81.31, y: "0", founding: false },
+                    { year: 2022, car: 33.24, carPrev: 38.03, npl: 2.45, nplPrev: 3.64, llr: 1.57, roa: 2.27, roaPrev: 8.33, roe: 16.53, liq: 73.00, fdr: 27.49, cir: 61.00, fund: 81.43, y: "0", founding: false },
+                    { year: 2023, car: 37.89, carPrev: 33.24, npl: 40.51, nplPrev: 2.45, llr: 0.97, roa: 18.90, roaPrev: 2.27, roe: 117.19, liq: 76.12, fdr: 30.88, cir: 8.49, fund: 86.18, y: "NA", founding: false }
+                ]
+            },
+            siib: {
+                name: "بنك سورية الدولي الإسلامي",
+                period: "2012 – 2023",
+                rows: [
+                    { year: 2012, car: 53.23, carPrev: null, npl: 24.05, nplPrev: null, llr: 6.28, roa: 0.79, roaPrev: null, roe: 6.55, liq: 67.81, fdr: 57.24, cir: 73.80, fund: 50.04, y: "0", founding: false },
+                    { year: 2013, car: 29.02, carPrev: 53.23, npl: 56.31, nplPrev: 24.05, llr: 19.55, roa: 0.22, roaPrev: 0.79, roe: 2.03, liq: 64.29, fdr: 37.44, cir: 156.41, fund: 62.30, y: "1", founding: false },
+                    { year: 2014, car: 23.69, carPrev: 29.02, npl: 49.77, nplPrev: 56.31, llr: 27.29, roa: -0.23, roaPrev: 0.22, roe: -2.23, liq: 60.35, fdr: 47.88, cir: 126.22, fund: 59.33, y: "NA", founding: false },
+                    { year: 2015, car: 30.64, carPrev: 23.69, npl: 32.38, nplPrev: 49.77, llr: 22.19, roa: 5.25, roaPrev: -0.23, roe: 47.57, liq: 51.89, fdr: 65.88, cir: 26.51, fund: 58.52, y: "0", founding: false },
+                    { year: 2016, car: 41.32, carPrev: 30.64, npl: 36.82, nplPrev: 32.38, llr: 27.48, roa: 6.95, roaPrev: 5.25, roe: 55.08, liq: 71.43, fdr: 32.88, cir: 3.01, fund: 56.33, y: "1", founding: false },
+                    { year: 2017, car: 20.01, carPrev: 41.32, npl: 23.80, nplPrev: 36.82, llr: 18.23, roa: -0.71, roaPrev: 6.95, roe: -6.70, liq: 70.91, fdr: 30.36, cir: 104.58, fund: 61.47, y: "NA", founding: false },
+                    { year: 2018, car: 16.39, carPrev: 20.01, npl: 11.15, nplPrev: 23.80, llr: 8.77, roa: 0.72, roaPrev: -0.71, roe: 8.97, liq: 60.11, fdr: 51.36, cir: 59.92, fund: 69.76, y: "0", founding: false },
+                    { year: 2019, car: 10.36, carPrev: 16.39, npl: 5.35, nplPrev: 11.15, llr: 3.67, roa: 1.14, roaPrev: 0.72, roe: 19.61, liq: 45.71, fdr: 115.51, cir: 48.57, fund: 46.01, y: "0", founding: false },
+                    { year: 2020, car: 11.53, carPrev: 10.36, npl: 10.82, nplPrev: 5.35, llr: 5.77, roa: 4.96, roaPrev: 1.14, roe: 84.51, liq: 49.07, fdr: 109.87, cir: 25.11, fund: 44.91, y: "0", founding: false },
+                    { year: 2021, car: 14.90, carPrev: 11.53, npl: 6.82, nplPrev: 10.82, llr: 6.82, roa: 4.77, roaPrev: 4.96, roe: 70.26, liq: 55.89, fdr: 83.21, cir: 27.84, fund: 49.27, y: "0", founding: false },
+                    { year: 2022, car: 14.75, carPrev: 14.90, npl: 9.93, nplPrev: 6.82, llr: 9.18, roa: 1.21, roaPrev: 4.77, roe: 16.63, liq: 54.56, fdr: 86.71, cir: 71.03, fund: 47.85, y: "0", founding: false },
+                    { year: 2023, car: 22.33, carPrev: 14.75, npl: 16.59, nplPrev: 9.93, llr: 17.81, roa: 9.29, roaPrev: 1.21, roe: 108.10, liq: 69.04, fdr: 52.47, cir: 21.08, fund: 41.98, y: "NA", founding: false }
+                ]
+            },
+            baraka: {
+                name: "بنك البركة – سورية",
+                period: "2014 – 2025",
+                rows: [
+                    { year: 2014, car: 27.00, carPrev: null, npl: 33.47, nplPrev: null, llr: 30.45, roa: 3.36, roaPrev: null, roe: 27.79, liq: 68.92, fdr: 10.51, cir: 19.81, fund: 64.65, y: "0", founding: false },
+                    { year: 2015, car: 16.00, carPrev: 27.00, npl: 17.93, nplPrev: 33.47, llr: 17.05, roa: 5.78, roaPrev: 3.36, roe: 51.55, liq: 45.59, fdr: 20.75, cir: 17.50, fund: 62.61, y: "0", founding: false },
+                    { year: 2016, car: 15.00, carPrev: 16.00, npl: 20.94, nplPrev: 17.93, llr: 22.92, roa: 5.21, roaPrev: 5.78, roe: 46.18, liq: 61.52, fdr: 12.36, cir: 18.85, fund: 67.14, y: "0", founding: false },
+                    { year: 2017, car: 12.00, carPrev: 15.00, npl: 15.44, nplPrev: 20.94, llr: 14.54, roa: 0.10, roaPrev: 5.21, roe: 0.99, liq: 79.44, fdr: 11.94, cir: 64.49, fund: 81.97, y: "0", founding: false },
+                    { year: 2018, car: 22.00, carPrev: 12.00, npl: 23.35, nplPrev: 15.44, llr: 13.29, roa: 1.20, roaPrev: 0.10, roe: 14.51, liq: 81.70, fdr: 11.74, cir: 39.73, fund: 81.63, y: "0", founding: false },
+                    { year: 2019, car: 30.00, carPrev: 22.00, npl: 10.25, nplPrev: 23.35, llr: 9.20, roa: 1.81, roaPrev: 1.20, roe: 18.82, liq: 72.20, fdr: 24.91, cir: 34.50, fund: 76.48, y: "0", founding: false },
+                    { year: 2020, car: 29.00, carPrev: 30.00, npl: 32.78, nplPrev: 10.25, llr: 20.63, roa: 9.44, roaPrev: 1.81, roe: 83.05, liq: 86.96, fdr: 7.70, cir: 14.20, fund: 77.70, y: "0", founding: false },
+                    { year: 2021, car: 40.00, carPrev: 29.00, npl: 20.14, nplPrev: 32.78, llr: 20.15, roa: 8.72, roaPrev: 9.44, roe: 68.86, liq: 86.65, fdr: 8.97, cir: 12.53, fund: 71.01, y: "0", founding: false },
+                    { year: 2022, car: 48.00, carPrev: 40.00, npl: 13.90, nplPrev: 20.14, llr: 14.67, roa: 4.09, roaPrev: 8.72, roe: 27.03, liq: 82.73, fdr: 15.41, cir: 28.82, fund: 69.55, y: "0", founding: false },
+                    { year: 2023, car: 49.00, carPrev: 48.00, npl: 21.14, nplPrev: 13.90, llr: 21.89, roa: 15.22, roaPrev: 4.09, roe: 107.41, liq: 88.86, fdr: 9.91, cir: 10.98, fund: 63.01, y: "0", founding: false },
+                    { year: 2024, car: 49.00, carPrev: 49.00, npl: 18.66, nplPrev: 21.14, llr: 19.41, roa: 2.30, roaPrev: 15.22, roe: 17.55, liq: 86.49, fdr: 11.38, cir: 37.28, fund: 78.06, y: "1", founding: false },
+                    { year: 2025, car: 55.00, carPrev: 49.00, npl: 5.84, nplPrev: 18.66, llr: 5.28, roa: -0.83, roaPrev: 2.30, roe: -5.83, liq: 72.11, fdr: 12.65, cir: 117.12, fund: 75.73, y: "NA", founding: false }
+                ]
+            },
+            nib: {
+                name: "البنك الوطني الإسلامي",
+                period: "2023 – 2025",
+                rows: [
+                    { year: 2023, car: 763.96, carPrev: null, npl: 0.00, nplPrev: null, llr: 0.21, roa: 58.43, roaPrev: null, roe: 93.62, liq: 79.76, fdr: 16.17, cir: 22.27, fund: 9.69, y: "0", founding: true },
+                    { year: 2024, car: 97.51, carPrev: 763.96, npl: 14.88, nplPrev: 0.00, llr: 3.39, roa: 0.96, roaPrev: 58.43, roe: 7.01, liq: 81.47, fdr: 18.24, cir: 81.93, fund: 80.72, y: "1", founding: false },
+                    { year: 2025, car: 37.81, carPrev: 97.51, npl: 12.27, nplPrev: 14.88, llr: 2.64, roa: -1.09, roaPrev: 0.96, roe: -16.70, liq: 85.31, fdr: 13.26, cir: 119.45, fund: 84.71, y: "NA", founding: false }
+                ]
+            }
+        };
+
+        // 2. الأوزان الأساسية المعتمدة من الجدول (14)
+        const BASE_WEIGHTS = {
+            car: 0.270,
+            cir: 0.270,
+            roa: 0.173,
+            npl: 0.152,
+            cov: 0.135
+        };
+
+        let currentInputMode = 'ratios';
+        let historyChartInstance = null;
+        let comparisonChartInstance = null;
+
+        // 3. التنقل بين التبويبات
+        function switchTab(tabName) {
+            ['simulator', 'explorer', 'methodology'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                btn.classList.remove('tab-active');
+                btn.classList.add('tab-inactive');
+            });
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            activeBtn.classList.remove('tab-inactive');
+            activeBtn.classList.add('tab-active');
+
+            if (tabName === 'explorer') {
+                renderComparisonOrHistory();
+            } else if (tabName === 'methodology') {
+                renderComparisonChart();
+            }
+        }
+
+        // 4. التبديل بين وضع النسب الجاهزة والبنود المحاسبية الخام
+        function setInputMode(mode) {
+            currentInputMode = mode;
+            const btnRatios = document.getElementById('mode-ratios');
+            const btnRaw = document.getElementById('mode-raw');
+            const panelRatios = document.getElementById('panel-ratios');
+            const panelRaw = document.getElementById('panel-raw');
+
+            if (mode === 'ratios') {
+                btnRatios.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-burgundy-700 text-white shadow transition";
+                btnRaw.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-burgundy-800 hover:bg-cream-300 transition";
+                panelRatios.classList.remove('hidden');
+                panelRaw.classList.add('hidden');
+                calculateEWS();
+            } else {
+                btnRaw.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-burgundy-700 text-white shadow transition";
+                btnRatios.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-burgundy-800 hover:bg-cream-300 transition";
+                panelRaw.classList.remove('hidden');
+                panelRatios.classList.add('hidden');
+                computeFromRaw();
+            }
+        }
+
+        // 5. احتساب النسب تلقائياً من البنود المحاسبية الخام
+        function computeFromRaw() {
+            const regCap = parseFloat(document.getElementById('raw-reg-cap').value);
+            const rwa = parseFloat(document.getElementById('raw-rwa').value);
+            const carPrev = parseFloat(document.getElementById('raw-car-prev').value);
+            const netInc = parseFloat(document.getElementById('raw-net-inc').value);
+            const assetsBeg = parseFloat(document.getElementById('raw-assets-beg').value);
+            const assetsEnd = parseFloat(document.getElementById('raw-assets-end').value);
+            const totFin = parseFloat(document.getElementById('raw-tot-fin').value);
+            const nplAmt = parseFloat(document.getElementById('raw-npl-amt').value);
+            const llrAmt = parseFloat(document.getElementById('raw-llr-amt').value);
+            const opExp = parseFloat(document.getElementById('raw-op-exp').value);
+            const opInc = parseFloat(document.getElementById('raw-op-inc').value);
+
+            // تعبئة حقول النسب المحسوبة
+            document.getElementById('r-car-curr').value = (!isNaN(regCap) && !isNaN(rwa) && rwa > 0) ? ((regCap / rwa) * 100).toFixed(2) : '';
+            document.getElementById('r-car-prev').value = !isNaN(carPrev) ? carPrev : '';
+            document.getElementById('r-cir').value = (!isNaN(opExp) && !isNaN(opInc) && opInc > 0) ? ((opExp / opInc) * 100).toFixed(2) : '';
+            
+            const avgAssets = (!isNaN(assetsBeg) && !isNaN(assetsEnd)) ? (assetsBeg + assetsEnd) / 2 : assetsEnd;
+            document.getElementById('r-roa-curr').value = (!isNaN(netInc) && !isNaN(avgAssets) && avgAssets > 0) ? ((netInc / avgAssets) * 100).toFixed(2) : '';
+            
+            document.getElementById('r-npl-curr').value = (!isNaN(nplAmt) && !isNaN(totFin) && totFin > 0) ? ((nplAmt / totFin) * 100).toFixed(2) : '';
+            document.getElementById('r-cov').value = (!isNaN(llrAmt) && !isNaN(nplAmt) && nplAmt > 0) ? ((llrAmt / nplAmt) * 100).toFixed(2) : '';
+
+            calculateEWS();
+        }
+
+        function toggleSectoralInputs() {
+            const checked = document.getElementById('chk-sectoral').checked;
+            const box = document.getElementById('sectoral-details');
+            if (checked) box.classList.remove('hidden');
+            else box.classList.add('hidden');
+        }
+
+        // 6. المحرك الرئيسي لحساب القاعدة المعدلة ثلاثية الطبقات
+        function evaluateObservation(params) {
+            const { carCurr, carPrev, cir, roaCurr, roaPrev, nplCurr, nplPrev, cov, isFounding, isSectoralShock, fxr } = params;
+
+            // فحص توافر كل مؤشر (لإعادة توزيع الأوزان عند غياب أي مؤشر)
+            const hasCarChange = !isNaN(carCurr) && !isNaN(carPrev) && !isFounding;
+            const hasCir = !isNaN(cir);
+            const hasRoa = !isNaN(roaCurr);
+            const hasNpl = !isNaN(nplCurr);
+            const hasCov = !isNaN(cov);
+
+            const available = {
+                car: hasCarChange,
+                cir: hasCir,
+                roa: hasRoa,
+                npl: hasNpl,
+                cov: hasCov
+            };
+
+            let totalAvailableWeight = 0;
+            Object.keys(BASE_WEIGHTS).forEach(k => {
+                if (available[k]) totalAvailableWeight += BASE_WEIGHTS[k];
+            });
+
+            // حساب الأوزان الفعلية المعاد تطبيعها لتساوي 100%
+            const effectiveWeights = {};
+            Object.keys(BASE_WEIGHTS).forEach(k => {
+                effectiveWeights[k] = (available[k] && totalAvailableWeight > 0) ? (BASE_WEIGHTS[k] / totalAvailableWeight) : 0;
+            });
+
+            // تقييم إشارات الخطر (Z = 1 أو 0) وفق عتبات الجدول (14)
+            const signals = { car: 0, cir: 0, roa: 0, npl: 0, cov: 0 };
+            const details = {};
+
+            // 1) CAR Change: انخفاض بمقدار 5.32 نقطة مئوية أو أكثر
+            if (hasCarChange) {
+                const deltaCar = carCurr - carPrev;
+                signals.car = (deltaCar <= -5.32) ? 1 : 0;
+                details.car = `التغير: ${deltaCar > 0 ? '+' : ''}${deltaCar.toFixed(2)} نقطة`;
+            } else {
+                details.car = isFounding ? "محايد (سنة تأسيس)" : "بيانات غير متوفرة";
+            }
+
+            // 2) CIR Level: >= 67.76%
+            if (hasCir) {
+                signals.cir = (cir >= 67.76) ? 1 : 0;
+                details.cir = `${cir.toFixed(2)}%`;
+            } else {
+                details.cir = "غير متوفر";
+            }
+
+            // 3) ROA Level / Change / Loss: <= 0.88% OR drop >= 3.01 pts OR < 0%
+            if (hasRoa) {
+                const deltaRoa = !isNaN(roaPrev) ? (roaCurr - roaPrev) : 0;
+                const condLevel = roaCurr <= 0.88;
+                const condDrop = !isNaN(roaPrev) && (deltaRoa <= -3.01);
+                const condLoss = roaCurr < 0;
+                signals.roa = (condLevel || condDrop || condLoss) ? 1 : 0;
+                details.roa = `${roaCurr.toFixed(2)}%` + (!isNaN(roaPrev) ? ` (${deltaRoa > 0 ? '+' : ''}${deltaRoa.toFixed(2)})` : '');
+            } else {
+                details.roa = "غير متوفر";
+            }
+
+            // 4) NPL Level / Change: >= 28.21% OR rise >= 6.06 pts
+            if (hasNpl) {
+                const deltaNpl = !isNaN(nplPrev) ? (nplCurr - nplPrev) : 0;
+                const condLevel = nplCurr >= 28.21;
+                const condRise = !isNaN(nplPrev) && (deltaNpl >= 6.06);
+                signals.npl = (condLevel || condRise) ? 1 : 0;
+                details.npl = `${nplCurr.toFixed(2)}%` + (!isNaN(nplPrev) ? ` (${deltaNpl > 0 ? '+' : ''}${deltaNpl.toFixed(2)})` : '');
+            } else {
+                details.npl = "غير متوفر";
+            }
+
+            // 5) COV Level: <= 51.04%
+            if (hasCov) {
+                signals.cov = (cov <= 51.04) ? 1 : 0;
+                details.cov = `${cov.toFixed(2)}%`;
+            } else {
+                details.cov = "غير متوفر";
+            }
+
+            // حساب الدرجة المركبة الموزونة S
+            let score = 0;
+            Object.keys(BASE_WEIGHTS).forEach(k => {
+                score += effectiveWeights[k] * signals[k];
+            });
+            score = Math.round(score * 100) / 100;
+
+            // تحديد المستوى الأساسي من الجدول (15)
+            // 0: منخفض, 1: متوسط, 2: مرتفع, 3: حرج
+            let tierIndex = 0;
+            if (score >= 0.50) tierIndex = 3;
+            else if (score >= 0.30) tierIndex = 2;
+            else if (score >= 0.15) tierIndex = 1;
+            else tierIndex = 0;
+
+            const notices = [];
+
+            // التحقق من إعادة توزيع الأوزان
+            if (totalAvailableWeight > 0 && totalAvailableWeight < 0.999) {
+                notices.push({
+                    type: 'info',
+                    text: `تم إعادة توزيع الأوزان نسبياً على المؤشرات المتاحة فقط (${Math.round(totalAvailableWeight * 100)}% من الوزن الأساسي) دون تعويض القيم المفقودة بالصفر.`
+                });
+            }
+
+            // الطبقة الثانية: قواعد التجاوز الرقابية المطلقة (CAR < 8% و CAR < 10.5%)
+            let overrideStar = false;
+            if (!isNaN(carCurr)) {
+                if (carCurr < 8.0) {
+                    tierIndex = 3;
+                    overrideStar = true;
+                    notices.push({
+                        type: 'danger',
+                        text: `تفعيل قاعدة التجاوز الرقابي: انخفاض كفاية رأس المال (${carCurr.toFixed(2)}%) دون الحد الأدنى الرقابي (8%) يرفع الإنذار فوراً إلى «حرج».`
+                    });
+                } else if (carCurr < 10.5 && tierIndex < 2) {
+                    tierIndex = 2;
+                    overrideStar = true;
+                    notices.push({
+                        type: 'warning',
+                        text: `تفعيل قاعدة التجاوز الرقابي (بازل 3): انخفاض كفاية رأس المال (${carCurr.toFixed(2)}%) دون هامش الحماية (10.5%) يرفع الإنذار إلى «مرتفع*».`
+                    });
+                }
+            }
+
+            // الطبقة الثالثة: طبقة الإنذار القطاعي (الصدمات الخارجية وسعر الصرف)
+            if (isSectoralShock) {
+                if (!isNaN(fxr) && fxr >= 15.0) {
+                    if (tierIndex < 3) {
+                        tierIndex += 1;
+                        overrideStar = true;
+                        notices.push({
+                            type: 'sectoral',
+                            text: `تفعيل طبقة الإنذار القطاعي: وجود صدمة خارجية مشتركة مع انكشاف مرتفع لمراكز القطع (FXR = ${fxr.toFixed(1)}% ≥ 15%) أدى لرفع الإنذار درجة واحدة.`
+                        });
+                    } else {
+                        notices.push({
+                            type: 'sectoral',
+                            text: `طبقة الإنذار القطاعي نشطة: المصرف منكشف لمخاطر الصرف (FXR = ${fxr.toFixed(1)}%) وهو أصلاً عند الحد الأقصى للإنذار (حرج).`
+                        });
+                    }
+                } else {
+                    notices.push({
+                        type: 'info',
+                        text: `طبقة الإنذار القطاعي نشطة، لكن انكشاف المصرف لمراكز القطع (${isNaN(fxr) ? 0 : fxr.toFixed(1)}%) دون عتبة الحساسية (15%) فلم يُصعَّد الإنذار.`
+                    });
+                }
+            }
+
+            return {
+                score,
+                tierIndex,
+                overrideStar,
+                signals,
+                effectiveWeights,
+                details,
+                notices
+            };
+        }
+
+        // 7. تحديث واجهة النتائج في لوحة المحاكاة
+        function calculateEWS() {
+            const bankName = document.getElementById('inp-bank-name').value || "مصرف إسلامي";
+            const year = document.getElementById('inp-year').value || "";
+
+            const params = {
+                carCurr: parseFloat(document.getElementById('r-car-curr').value),
+                carPrev: parseFloat(document.getElementById('r-car-prev').value),
+                cir: parseFloat(document.getElementById('r-cir').value),
+                roaCurr: parseFloat(document.getElementById('r-roa-curr').value),
+                roaPrev: parseFloat(document.getElementById('r-roa-prev').value),
+                nplCurr: parseFloat(document.getElementById('r-npl-curr').value),
+                nplPrev: parseFloat(document.getElementById('r-npl-prev').value),
+                cov: parseFloat(document.getElementById('r-cov').value),
+                isFounding: document.getElementById('chk-founding').checked,
+                isSectoralShock: document.getElementById('chk-sectoral').checked,
+                fxr: parseFloat(document.getElementById('inp-fxr').value)
+            };
+
+            const res = evaluateObservation(params);
+
+            // تحديث العنوان والدرجة
+            document.getElementById('res-bank-title').textContent = `${bankName} ${year ? `(${year})` : ''}`;
+            document.getElementById('res-score').textContent = res.score.toFixed(2);
+
+            // تحريك مؤشر الشريط البصري (RTL: من اليمين 0% إلى اليسار 100%)
+            const pct = Math.min(100, Math.max(0, res.score * 100));
+            document.getElementById('score-pointer').style.right = `${pct}%`;
+
+            // بيانات المستويات الأربعة من الجدول (15)
+            const TIERS = [
+                {
+                    label: "إنذار منخفض",
+                    badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                    borderClass: "border-emerald-500",
+                    owner: "إدارة المخاطر",
+                    freq: "سنوي",
+                    action: "متابعة دورية وتحديث البيانات المالية ومراقبة المؤشرات المساندة."
+                },
+                {
+                    label: "إنذار متوسط",
+                    badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
+                    borderClass: "border-amber-500",
+                    owner: "إدارة المخاطر",
+                    freq: "نصف سنوي",
+                    action: "تحليل أسباب الإشارة التحذيرية ومتابعة اتجاهها وتقييم مدى استمرارها."
+                },
+                {
+                    label: "إنذار مرتفع",
+                    badgeClass: "bg-orange-100 text-orange-800 border-orange-300",
+                    borderClass: "border-orange-500",
+                    owner: "الإدارة العليا ولجنة المخاطر",
+                    freq: "ربع سنوي",
+                    action: "إجراء تحليل معمق لمصادر الخطر ووضع خطة تصحيحية ورفع تقرير دوري للجنة المخاطر."
+                },
+                {
+                    label: "إنذار حرج",
+                    badgeClass: "bg-red-100 text-red-800 border-red-300",
+                    borderClass: "border-red-600",
+                    owner: "مجلس الإدارة",
+                    freq: "فوري",
+                    action: "تصعيد فوري وتفعيل خطة المعالجة الطارئة وإبلاغ مصرف سورية المركزي."
+                }
+            ];
+
+            const currentTier = TIERS[res.tierIndex];
+            const badgeEl = document.getElementById('res-badge');
+            badgeEl.textContent = currentTier.label + (res.overrideStar ? "*" : "");
+            badgeEl.className = `px-4 py-1.5 rounded-full text-sm font-extrabold border shadow-sm ${currentTier.badgeClass}`;
+
+            const cardEl = document.getElementById('result-card');
+            cardEl.className = `glass-card rounded-2xl p-6 border-t-8 transition-all ${currentTier.borderClass}`;
+
+            document.getElementById('gov-owner').textContent = currentTier.owner;
+            document.getElementById('gov-freq').textContent = currentTier.freq;
+            document.getElementById('gov-action').textContent = currentTier.action;
+
+            // عرض التنبيهات الخاصة
+            const noticesBox = document.getElementById('res-notices');
+            noticesBox.innerHTML = '';
+            res.notices.forEach(n => {
+                let style = "bg-blue-50 text-blue-800 border-blue-200";
+                if (n.type === 'danger') style = "bg-red-50 text-red-800 border-red-200";
+                else if (n.type === 'warning') style = "bg-orange-50 text-orange-800 border-orange-200";
+                else if (n.type === 'sectoral') style = "bg-amber-50 text-amber-900 border-amber-300";
+
+                noticesBox.innerHTML += `<div class="p-2.5 rounded-xl border text-xs font-semibold leading-relaxed ${style}">${n.text}</div>`;
+            });
+
+            // تحديث جدول تفكيك المؤشرات
+            const INDICATORS_META = [
+                { key: 'car', name: 'تغير كفاية رأس المال (ΔCAR)' },
+                { key: 'cir', name: 'الكفاءة التشغيلية (CIR)' },
+                { key: 'roa', name: 'العائد على الموجودات (ROA)' },
+                { key: 'npl', name: 'التمويلات المتعثرة (NPL)' },
+                { key: 'cov', name: 'تغطية المخصصات (COV)' }
+            ];
+
+            const tbody = document.getElementById('breakdown-tbody');
+            tbody.innerHTML = '';
+            INDICATORS_META.forEach(ind => {
+                const sig = res.signals[ind.key];
+                const w = res.effectiveWeights[ind.key];
+                const contrib = sig * w;
+                const isNA = w === 0;
+
+                let statusBadge = '';
+                if (isNA) {
+                    statusBadge = `<span class="px-2 py-0.5 rounded bg-gray-100 text-gray-500 font-bold">مستبعد (NA)</span>`;
+                } else if (sig === 1) {
+                    statusBadge = `<span class="px-2 py-0.5 rounded bg-red-100 text-red-700 font-extrabold">إشارة خطر (1)</span>`;
+                } else {
+                    statusBadge = `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-bold">آمن (0)</span>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-cream-50">
+                        <td class="p-2.5 font-bold text-gray-800">${ind.name}</td>
+                        <td class="p-2.5 font-mono text-gray-700">${res.details[ind.key]}</td>
+                        <td class="p-2.5 font-bold text-burgundy-700">${(w * 100).toFixed(1)}%</td>
+                        <td class="p-2.5">${statusBadge}</td>
+                        <td class="p-2.5 font-extrabold ${contrib > 0 ? 'text-red-600' : 'text-gray-400'}">+${contrib.toFixed(3)}</td>
+                    </tr>
+                `;
+            });
+
+            updateAuxBadges();
+        }
+
+        // 8. تحديث شارات المؤشرات المساندة غير الموزونة
+        function updateAuxBadges() {
+            const roe = parseFloat(document.getElementById('aux-roe').value);
+            const liq = parseFloat(document.getElementById('aux-liq').value);
+            const fdr = parseFloat(document.getElementById('aux-fdr').value);
+            const fund = parseFloat(document.getElementById('aux-fund').value);
+
+            setAuxStatus('badge-roe', !isNaN(roe) && roe <= 6.96);
+            setAuxStatus('badge-liq', !isNaN(liq) && liq <= 62.90);
+            setAuxStatus('badge-fdr', !isNaN(fdr) && fdr >= 48.62);
+            setAuxStatus('badge-fund', !isNaN(fund) && fund <= 58.93);
+        }
+
+        function setAuxStatus(id, isAlert) {
+            const el = document.getElementById(id);
+            if (isAlert) {
+                el.textContent = "تجاوز الحد الاسترشادي";
+                el.className = "inline-block mt-1 text-[10px] font-bold text-amber-700";
+            } else {
+                el.textContent = "ضمن النطاق الطبيعي";
+                el.className = "inline-block mt-1 text-[10px] font-bold text-emerald-600";
+            }
+        }
+
+        // 9. تحميل الحالات المرجعية الجاهزة للمناقشة
+        function loadPreset(presetKey) {
+            setInputMode('ratios');
+            document.getElementById('chk-founding').checked = false;
+            document.getElementById('chk-sectoral').checked = false;
+            toggleSectoralInputs();
+
+            if (presetKey === 'siib_2013') {
+                loadRowIntoSimulator('بنك سورية الدولي الإسلامي', HISTORICAL_DATA.siib.rows[1]); // 2013
+            } else if (presetKey === 'siib_2019') {
+                loadRowIntoSimulator('بنك سورية الدولي الإسلامي', HISTORICAL_DATA.siib.rows[7]); // 2019 (CAR=10.36%)
+            } else if (presetKey === 'nib_2024') {
+                loadRowIntoSimulator('البنك الوطني الإسلامي', HISTORICAL_DATA.nib.rows[1]); // 2024
+            } else if (presetKey === 'cham_2016_shock') {
+                loadRowIntoSimulator('بنك الشام', HISTORICAL_DATA.cham.rows[4]); // 2016 + تفعيل الصدمة القطاعية
+                document.getElementById('chk-sectoral').checked = true;
+                document.getElementById('inp-fxr').value = 28;
+                toggleSectoralInputs();
+                calculateEWS();
+            } else if (presetKey === 'baraka_2023') {
+                loadRowIntoSimulator('بنك البركة – سورية', HISTORICAL_DATA.baraka.rows[9]); // 2023
+            }
+        }
+
+        function loadRowIntoSimulator(bankName, row) {
+            setInputMode('ratios');
+            document.getElementById('inp-bank-name').value = bankName;
+            document.getElementById('inp-year').value = row.year;
+            document.getElementById('r-car-curr').value = row.car;
+            document.getElementById('r-car-prev').value = row.carPrev !== null ? row.carPrev : '';
+            document.getElementById('r-cir').value = row.cir;
+            document.getElementById('r-roa-curr').value = row.roa;
+            document.getElementById('r-roa-prev').value = row.roaPrev !== null ? row.roaPrev : '';
+            document.getElementById('r-npl-curr').value = row.npl;
+            document.getElementById('r-npl-prev').value = row.nplPrev !== null ? row.nplPrev : '';
+            
+            const cov = (row.npl > 0) ? ((row.llr / row.npl) * 100).toFixed(2) : '';
+            document.getElementById('r-cov').value = cov;
+
+            document.getElementById('aux-roe').value = row.roe;
+            document.getElementById('aux-liq').value = row.liq;
+            document.getElementById('aux-fdr').value = row.fdr;
+            document.getElementById('aux-fund').value = row.fund;
+
+            document.getElementById('chk-founding').checked = !!row.founding;
+            document.getElementById('chk-sectoral').checked = false;
+            toggleSectoralInputs();
+
+            calculateEWS();
+        }
+
+        // 10. عرض قاعدة البيانات التاريخية لكل مصرف والرسم البياني الزمني
+        let selectedBankKey = 'cham';
+
+        function selectBankHistory(bankKey) {
+            selectedBankKey = bankKey;
+            ['cham', 'siib', 'baraka', 'nib'].forEach(k => {
+                const btn = document.getElementById(`btn-bank-${k}`);
+                if (k === bankKey) {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-burgundy-700 text-white shadow";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-cream-200 text-burgundy-900 hover:bg-cream-300";
+                }
+            });
+            renderComparisonOrHistory();
+        }
+
+        function renderComparisonOrHistory() {
+            const bank = HISTORICAL_DATA[selectedBankKey];
+            document.getElementById('chart-bank-title').textContent = `مسار الدرجة المركبة للإنذار المبكر S(t) — ${bank.name} (${bank.period})`;
+
+            const tbody = document.getElementById('history-tbody');
+            tbody.innerHTML = '';
+
+            const labels = [];
+            const scores = [];
+            const pointColors = [];
+
+            const TIER_NAMES = ["منخفض", "متوسط", "مرتفع", "حرج"];
+            const TIER_STYLES = [
+                "bg-emerald-100 text-emerald-800",
+                "bg-amber-100 text-amber-800",
+                "bg-orange-100 text-orange-800",
+                "bg-red-100 text-red-800"
+            ];
+
+            bank.rows.forEach((r, idx) => {
+                const covVal = (r.npl > 0) ? (r.llr / r.npl) * 100 : NaN;
+                const evalRes = evaluateObservation({
+                    carCurr: r.car,
+                    carPrev: r.carPrev,
+                    cir: r.cir,
+                    roaCurr: r.roa,
+                    roaPrev: r.roaPrev,
+                    nplCurr: r.npl,
+                    nplPrev: r.nplPrev,
+                    cov: covVal,
+                    isFounding: r.founding,
+                    isSectoralShock: false,
+                    fxr: 0
+                });
+
+                labels.push(r.year);
+                scores.push(evalRes.score);
+                pointColors.push(r.y === "1" ? "#DC2626" : "#6B1D2F");
+
+                const yBadge = r.y === "1"
+                    ? `<span class="px-2.5 py-0.5 rounded-full bg-red-600 text-white font-extrabold">1 (تعثر لاحق)</span>`
+                    : (r.y === "NA"
+                        ? `<span class="px-2 py-0.5 rounded bg-gray-100 text-gray-500 font-bold">NA</span>`
+                        : `<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold">0 (سليم)</span>`);
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-cream-100/80 transition ${r.y === '1' ? 'bg-red-50/40' : ''}">
+                        <td class="p-3 font-extrabold text-burgundy-900">${r.year}</td>
+                        <td class="p-3 font-mono">${r.car.toFixed(2)}%</td>
+                        <td class="p-3 font-mono">${r.npl.toFixed(2)}%</td>
+                        <td class="p-3 font-mono">${isNaN(covVal) ? '—' : covVal.toFixed(1) + '%'}</td>
+                        <td class="p-3 font-mono ${r.roa < 0 ? 'text-red-600 font-bold' : ''}">${r.roa.toFixed(2)}%</td>
+                        <td class="p-3 font-mono">${r.cir.toFixed(2)}%</td>
+                        <td class="p-3 font-extrabold text-burgundy-800">${evalRes.score.toFixed(2)}</td>
+                        <td class="p-3">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${TIER_STYLES[evalRes.tierIndex]}">
+                                ${TIER_NAMES[evalRes.tierIndex]}${evalRes.overrideStar ? '*' : ''}
+                            </span>
+                        </td>
+                        <td class="p-3">${yBadge}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="inspectHistoricalRow('${selectedBankKey}', ${idx})" class="px-3 py-1 rounded-lg bg-burgundy-700 text-white text-[11px] font-bold hover:bg-burgundy-800 transition">
+                                فحص في المحاكي
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // رسم المخطط الزمني
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            if (historyChartInstance) historyChartInstance.destroy();
+
+            historyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'الدرجة المركبة الموزونة (S)',
+                            data: scores,
+                            borderColor: '#6B1D2F',
+                            backgroundColor: 'rgba(107, 29, 47, 0.12)',
+                            borderWidth: 3,
+                            pointBackgroundColor: pointColors,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            fill: true,
+                            tension: 0.25
+                        },
+                        {
+                            label: 'عتبة الإنذار الحرج (0.50)',
+                            data: Array(labels.length).fill(0.50),
+                            borderColor: '#DC2626',
+                            borderWidth: 1.5,
+                            borderDash: [6, 6],
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: 'عتبة الإنذار المرتفع (0.30)',
+                            data: Array(labels.length).fill(0.30),
+                            borderColor: '#F97316',
+                            borderWidth: 1.5,
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const row = bank.rows[context.dataIndex];
+                                    return row.y === "1" ? "⚠️ سبقت هذه السنة حالة تعثر في (t+1)" : "";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 1.05,
+                            ticks: { font: { family: 'Cairo' } }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Cairo', weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function inspectHistoricalRow(bankKey, rowIndex) {
+            const bank = HISTORICAL_DATA[bankKey];
+            const row = bank.rows[rowIndex];
+            loadRowIntoSimulator(bank.name, row);
+            switchTab('simulator');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 11. الرسم البياني لمقارنة أداء النسخة الأولية والقاعدة المعدلة (الجدول 16)
+        function renderComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            if (comparisonChartInstance) comparisonChartInstance.destroy();
+
+            comparisonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['معدل الإصابة المسبقة (%)', 'معدل الإنذار الكاذب (%)', 'نسبة الضجيج إلى الإشارة (NSR × 100)'],
+                    datasets: [
+                        {
+                            label: 'النسخة الأولية (أوزان متساوية)',
+                            data: [20, 33, 167],
+                            backgroundColor: '#9CA3AF',
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'القاعدة المعدّلة الموزونة (1/NSR)',
+                            data: [40, 15, 37],
+                            backgroundColor: '#6B1D2F',
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: 'Cairo', weight: 'bold' } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { family: 'Cairo' } }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Cairo', weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // التشغيل الابتدائي عند فتح الصفحة
+        window.onload = function() {
+            calculateEWS();
+        };
+    </script>
+</body>
+</html>
